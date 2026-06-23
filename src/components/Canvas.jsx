@@ -1,0 +1,189 @@
+import { useRef, useEffect } from "react";
+
+export default function Canvas() {
+  const canvasRef = useRef(null);
+  const antsRef = useRef([]);
+  const beetlesRef = useRef([]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    const nestX = 850;
+    const nestY = 150;
+
+    // Create ants once
+    antsRef.current = [];
+
+    for (let i = 0; i < 50; i++) {
+    antsRef.current.push({
+  x: nestX + (Math.random() - 0.5) * 80,
+  y: nestY + (Math.random() - 0.5) * 80,
+  angle: Math.random() * Math.PI * 2,
+  speed: 1.5,
+
+  targetBeetle: null,
+});
+    }
+
+    function drawNest() {
+      ctx.shadowColor = "#ffb347";
+      ctx.shadowBlur = 25;
+      ctx.strokeStyle = "#ffb347";
+      ctx.lineWidth = 20;
+
+      ctx.beginPath();
+      ctx.arc(
+        nestX,
+        nestY,
+        60,
+        Math.PI,
+        0,
+        false
+      );
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+    }
+
+  function updateAnts() {
+  const DETECTION_RADIUS = 80;
+
+  antsRef.current.forEach((ant) => {
+
+    // DETECT BEETLE
+    if (!ant.targetBeetle) {
+      for (const beetle of beetlesRef.current) {
+
+        const dx = beetle.x - ant.x;
+        const dy = beetle.y - ant.y;
+
+        const distance = Math.sqrt(
+          dx * dx + dy * dy
+        );
+
+        if (distance < DETECTION_RADIUS) {
+          ant.targetBeetle = beetle;
+          break;
+        }
+      }
+    }
+
+    // MOVE
+    if (ant.targetBeetle) {
+
+      const targetAngle = Math.atan2(
+        ant.targetBeetle.y - ant.y,
+        ant.targetBeetle.x - ant.x
+      );
+
+      ant.angle +=
+        (targetAngle - ant.angle) * 0.05;
+
+    } else {
+
+      ant.angle +=
+        (Math.random() - 0.5) * 0.1;
+
+    }
+
+    ant.x += Math.cos(ant.angle) * ant.speed;
+    ant.y += Math.sin(ant.angle) * ant.speed;
+
+    // BOUNDARIES
+    if (ant.x < 0 || ant.x > canvas.width) {
+      ant.angle = Math.PI - ant.angle;
+    }
+
+    if (ant.y < 0 || ant.y > canvas.height) {
+      ant.angle = -ant.angle;
+    }
+
+  });
+}
+
+    function drawAnts() {
+      antsRef.current.forEach((ant) => {
+        ctx.beginPath();
+       ctx.fillStyle =
+  ant.targetBeetle
+    ? "#ff4444"
+    : "#e8e8e8";
+
+        ctx.arc(
+          ant.x,
+          ant.y,
+          3,
+          0,
+          Math.PI * 2
+        );
+
+        ctx.fill();
+      });
+    }
+
+    function drawBeetles() {
+      beetlesRef.current.forEach((beetle) => {
+        ctx.beginPath();
+
+        ctx.fillStyle = "#39ff14";
+
+        ctx.arc(
+          beetle.x,
+          beetle.y,
+          8,
+          0,
+          Math.PI * 2
+        );
+
+        ctx.fill();
+      });
+    }
+
+    function animate() {
+      ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      drawNest();
+      updateAnts();
+      drawAnts();
+      drawBeetles();
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  }, []);
+
+  function handleCanvasClick(e) {
+    const canvas = canvasRef.current;
+
+    const rect = canvas.getBoundingClientRect();
+
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    beetlesRef.current.push({
+      x,
+      y,
+      weight: 5,
+    });
+  }
+
+  return (
+    <canvas
+      ref={canvasRef}
+      onClick={handleCanvasClick}
+      width={1000}
+      height={700}
+      style={{
+        border: "1px solid white",
+        background: "#3c06a1",
+      }}
+    />
+  );
+}
