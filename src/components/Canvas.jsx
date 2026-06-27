@@ -308,8 +308,49 @@ if (
     ant.carryingBeetle.leader === ant
 ) {
 
-    ant.x += Math.cos(ant.angle) * ant.speed;
-    ant.y += Math.sin(ant.angle) * ant.speed;
+    const nextX =
+        ant.x +
+        Math.cos(ant.angle) * ant.speed;
+
+    const nextY =
+        ant.y +
+        Math.sin(ant.angle) * ant.speed;
+
+    let blocked = false;
+
+    obstaclesRef.current.forEach(obstacle => {
+
+        if (
+
+            nextX > obstacle.x &&
+
+            nextX < obstacle.x + obstacle.width &&
+
+            nextY > obstacle.y &&
+
+            nextY < obstacle.y + obstacle.height
+
+        ) {
+
+            blocked = true;
+
+        }
+
+    });
+
+    if (!blocked) {
+
+        ant.x = nextX;
+        ant.y = nextY;
+
+    }
+
+    else {
+
+        ant.angle +=
+            (Math.random() - 0.5) * 2;
+
+    }
 
 }
     if (ant.carryingBeetle) {
