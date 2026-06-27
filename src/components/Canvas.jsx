@@ -22,7 +22,8 @@ export default function Canvas() {
   angle: Math.random() * Math.PI * 2,
   speed: 1.5,
 
-  targetBeetle: null,
+ targetBeetle: null,
+carryingBeetle: null,
 });
     }
 
@@ -48,47 +49,95 @@ export default function Canvas() {
 
   function updateAnts() {
   const DETECTION_RADIUS = 80;
+const PICKUP_RADIUS = 12;
 
   antsRef.current.forEach((ant) => {
 
     // DETECT BEETLE
-    if (!ant.targetBeetle) {
-      for (const beetle of beetlesRef.current) {
+    if (!ant.targetBeetle && !ant.carryingBeetle) {
+  for (const beetle of beetlesRef.current) {
 
-        const dx = beetle.x - ant.x;
-        const dy = beetle.y - ant.y;
+    const dx = beetle.x - ant.x;
+    const dy = beetle.y - ant.y;
 
-        const distance = Math.sqrt(
-          dx * dx + dy * dy
-        );
+    const distance =
+      Math.sqrt(dx * dx + dy * dy);
 
-        if (distance < DETECTION_RADIUS) {
-          ant.targetBeetle = beetle;
-          break;
-        }
-      }
-    }
+   if (
+  !beetle.taken &&
+  distance < DETECTION_RADIUS
+) {
+  ant.targetBeetle = beetle;
+  break;
+}
+  }
+}
+
+
+   if (
+  ant.targetBeetle &&
+  !ant.carryingBeetle
+) {
+  const dx =
+    ant.targetBeetle.x - ant.x;
+
+  const dy =
+    ant.targetBeetle.y - ant.y;
+
+  const distance =
+    Math.sqrt(dx * dx + dy * dy);
+
+  if (distance < PICKUP_RADIUS) {
+ ant.carryingBeetle =
+  ant.targetBeetle;
+
+ant.carryingBeetle.taken = true;
+
+ant.targetBeetle = null;
+  }
+}
 
     // MOVE
-    if (ant.targetBeetle) {
+   if (ant.carryingBeetle) {
 
-      const targetAngle = Math.atan2(
-        ant.targetBeetle.y - ant.y,
-        ant.targetBeetle.x - ant.x
-      );
+  const targetAngle = Math.atan2(
+    nestY - ant.y,
+    nestX - ant.x
+  );
 
-      ant.angle +=
-        (targetAngle - ant.angle) * 0.05;
+  ant.angle +=
+    (targetAngle - ant.angle) * 0.05;
 
-    } else {
+}
+else if (ant.targetBeetle) {
 
-      ant.angle +=
-        (Math.random() - 0.5) * 0.1;
+  const targetAngle = Math.atan2(
+    ant.targetBeetle.y - ant.y,
+    ant.targetBeetle.x - ant.x
+  );
 
-    }
+  ant.angle +=
+    (targetAngle - ant.angle) * 0.05;
+
+}
+else {
+
+  ant.angle +=
+    (Math.random() - 0.5) * 0.1;
+
+}
 
     ant.x += Math.cos(ant.angle) * ant.speed;
     ant.y += Math.sin(ant.angle) * ant.speed;
+    if (ant.carryingBeetle) {
+
+  ant.carryingBeetle.x =
+    ant.x + 10;
+
+  ant.carryingBeetle.y =
+    ant.y + 10;
+
+}
 
     // BOUNDARIES
     if (ant.x < 0 || ant.x > canvas.width) {
@@ -106,10 +155,11 @@ export default function Canvas() {
       antsRef.current.forEach((ant) => {
         ctx.beginPath();
        ctx.fillStyle =
-  ant.targetBeetle
+  ant.carryingBeetle
+    ? "#00ffff"
+    : ant.targetBeetle
     ? "#ff4444"
     : "#e8e8e8";
-
         ctx.arc(
           ant.x,
           ant.y,
@@ -171,6 +221,7 @@ export default function Canvas() {
       x,
       y,
       weight: 5,
+      taken:false
     });
   }
 
