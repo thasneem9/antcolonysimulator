@@ -462,26 +462,66 @@ const nextY =
   });
 }
 
-    function drawAnts() {
-      antsRef.current.forEach((ant) => {
-        ctx.beginPath();
-       ctx.fillStyle =
-  ant.carryingBeetle
-    ? "#00ffff"
-    : ant.targetBeetle
-    ? "#ff4444"
-    : "#e8e8e8";
-        ctx.arc(
-          ant.x,
-          ant.y,
-          3,
-          0,
-          Math.PI * 2
-        );
+   function drawAnt(ant){
 
-        ctx.fill();
-      });
-    }
+    ctx.save();
+
+    ctx.translate(ant.x, ant.y);
+    ctx.rotate(ant.angle);
+
+    // BODY
+
+    ctx.fillStyle="#ddd";
+
+    // abdomen
+    ctx.beginPath();
+    ctx.ellipse(-4,0,3.5,2.8,0,0,Math.PI*2);
+    ctx.fill();
+
+    // thorax
+    ctx.beginPath();
+    ctx.arc(0,0,2.3,0,Math.PI*2);
+    ctx.fill();
+
+    // head
+    ctx.beginPath();
+    ctx.arc(4,0,1.8,0,Math.PI*2);
+    ctx.fill();
+
+    // LEGS
+
+    ctx.strokeStyle="#ddd";
+    ctx.lineWidth=0.8;
+
+    [-2,0,2].forEach(y=>{
+
+        ctx.beginPath();
+        ctx.moveTo(-0.5,y);
+
+        ctx.lineTo(-5,y-3);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(-0.5,y);
+
+        ctx.lineTo(-5,y+3);
+        ctx.stroke();
+
+    });
+
+    // ANTENNAE
+
+    ctx.beginPath();
+    ctx.moveTo(5,-0.5);
+    ctx.lineTo(8,-3);
+
+    ctx.moveTo(5,0.5);
+    ctx.lineTo(8,3);
+
+    ctx.stroke();
+
+    ctx.restore();
+}
 
     function drawBeetles() {
       beetlesRef.current.forEach((beetle) => {
@@ -513,6 +553,11 @@ ctx.fillText(
 );
       });
     }
+    function drawAnts(){
+
+    antsRef.current.forEach(drawAnt);
+
+}
     function drawPheromones() {
 
     pheromonesRef.current.forEach((pheromone)=>{
