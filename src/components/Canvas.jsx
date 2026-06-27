@@ -811,20 +811,123 @@ else{
 }
 function drawObstacles(){
 
-    obstaclesRef.current.forEach(obstacle=>{
+    obstaclesRef.current.forEach(wall=>{
 
-        ctx.fillStyle="#555";
+        const brickW = 18;
+        const brickH = 10;
 
+        // subtle shadow
+        ctx.shadowColor="rgba(0,0,0,.45)";
+        ctx.shadowBlur=8;
+        ctx.shadowOffsetY=3;
+
+        // stone background
+        ctx.fillStyle="#8d5b47";
         ctx.fillRect(
+            wall.x,
+            wall.y,
+            wall.width,
+            wall.height
+        );
 
-            obstacle.x,
+        ctx.shadowBlur=0;
 
-            obstacle.y,
+        // bricks
+        for(let row=0; row<wall.height/brickH; row++){
 
-            obstacle.width,
+            const offset =
+                row%2===0 ? 0 : brickW/2;
 
-            obstacle.height
+            for(
+                let col=-1;
+                col<wall.width/brickW+1;
+                col++
+            ){
 
+                const x =
+                    wall.x+
+                    col*brickW+
+                    offset;
+
+                const y=
+                    wall.y+
+                    row*brickH;
+
+                // slight random colour
+                const reds=[
+                    "#8a3c2b",
+                    "#96412e",
+                    "#7c3626",
+                    "#a14d37",
+                    "#8f4736"
+                ];
+
+                ctx.fillStyle=
+                    reds[(row+col)%reds.length];
+
+                ctx.fillRect(
+                    x+1,
+                    y+1,
+                    brickW-2,
+                    brickH-2
+                );
+            }
+        }
+
+        // mortar
+        ctx.strokeStyle="#c7b7aa";
+        ctx.lineWidth=1;
+
+        // horizontal mortar
+        for(
+            let y=wall.y;
+            y<=wall.y+wall.height;
+            y+=brickH
+        ){
+
+            ctx.beginPath();
+            ctx.moveTo(wall.x,y);
+            ctx.lineTo(wall.x+wall.width,y);
+            ctx.stroke();
+
+        }
+
+        // vertical mortar
+        for(let row=0; row<wall.height/brickH; row++){
+
+            const offset=
+                row%2===0 ? 0 : brickW/2;
+
+            for(
+                let x=wall.x+offset;
+                x<=wall.x+wall.width;
+                x+=brickW
+            ){
+
+                ctx.beginPath();
+                ctx.moveTo(
+                    x,
+                    wall.y+row*brickH
+                );
+
+                ctx.lineTo(
+                    x,
+                    wall.y+(row+1)*brickH
+                );
+
+                ctx.stroke();
+            }
+        }
+
+        // border
+        ctx.strokeStyle="#5b2c20";
+        ctx.lineWidth=2;
+
+        ctx.strokeRect(
+            wall.x,
+            wall.y,
+            wall.width,
+            wall.height
         );
 
     });
