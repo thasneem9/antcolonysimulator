@@ -123,12 +123,17 @@ const NEST_RADIUS = 60;
     const distance =
       Math.sqrt(dx * dx + dy * dy);
 
-   if (
-  !beetle.taken &&
-  distance < DETECTION_RADIUS
+  if (
+    distance < DETECTION_RADIUS &&
+    (
+        !beetle.taken ||
+        beetle.attachedAnts.length < beetle.weight
+    )
 ) {
-  ant.targetBeetle = beetle;
-  break;
+
+    ant.targetBeetle = beetle;
+    break;
+
 }
   }
 }
@@ -179,20 +184,20 @@ const NEST_RADIUS = 60;
 
     beetle.attachedAnts.push(ant);
 
-    if (beetle.attachedAnts.length >= beetle.weight) {
+    if (!beetle.taken) {
 
-      beetle.taken = true;
+    beetle.taken = true;
 
-beetle.leader = beetle.attachedAnts[0];
+    beetle.leader = beetle.attachedAnts[0];
 
-        beetle.attachedAnts.forEach(a => {
+}
 
-            a.carryingBeetle = beetle;
-            a.targetBeetle = null;
+beetle.attachedAnts.forEach(a => {
 
-        });
+    a.carryingBeetle = beetle;
+    a.targetBeetle = null;
 
-    }
+});
 
 }
 }
@@ -371,13 +376,32 @@ if (
     ant.carryingBeetle.leader === ant
 ) {
 
-    const nextX =
-        ant.x +
-        Math.cos(ant.angle) * ant.speed;
+let moveSpeed = ant.speed;
 
-    const nextY =
-        ant.y +
-        Math.sin(ant.angle) * ant.speed;
+if (ant.carryingBeetle) {
+
+    const beetle = ant.carryingBeetle;
+
+    const helpers = beetle.attachedAnts.length;
+
+    const effort =
+        Math.min(
+            helpers / beetle.weight,
+            1
+        );
+
+    moveSpeed =
+        ant.speed * effort;
+
+}
+
+const nextX =
+    ant.x +
+    Math.cos(ant.angle) * moveSpeed;
+
+const nextY =
+    ant.y +
+    Math.sin(ant.angle) * moveSpeed;
 
     let blocked = false;
 
@@ -633,7 +657,7 @@ if(tool==="beetle"){
 
         y,
 
-        weight:Math.floor(Math.random()*5)+1,
+        weight: Math.floor(Math.random() * 7) + 1,
 
         taken:false,
 
