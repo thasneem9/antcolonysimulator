@@ -51,7 +51,9 @@ pheromoneCooldown: 0,
 
   function updateAnts() {
   const DETECTION_RADIUS = 80;
+  const PHEROMONE_RADIUS = 60;
 const PICKUP_RADIUS = 12;
+
 
 const NEST_RADIUS = 60;
   antsRef.current.forEach((ant) => {
@@ -168,8 +170,52 @@ else if (ant.targetBeetle) {
 }
 else {
 
-  ant.angle +=
-    (Math.random() - 0.5) * 0.1;
+  let strongest = null;
+
+  pheromonesRef.current.forEach((pheromone)=>{
+
+    const dx = pheromone.x - ant.x;
+    const dy = pheromone.y - ant.y;
+
+    const distance =
+      Math.sqrt(dx*dx + dy*dy);
+
+    if(distance < PHEROMONE_RADIUS){
+
+      if(
+        !strongest ||
+        pheromone.strength > strongest.strength
+      ){
+
+        strongest = pheromone;
+
+      }
+
+    }
+
+  });
+
+  if(strongest){
+
+    const targetAngle = Math.atan2(
+
+      strongest.y - ant.y,
+
+      strongest.x - ant.x
+
+    );
+
+    ant.angle +=
+      (targetAngle-ant.angle)*0.05;
+
+  }
+
+  else{
+
+    ant.angle +=
+      (Math.random()-0.5)*0.1;
+
+  }
 
 }
 
@@ -241,10 +287,13 @@ else {
 
         ctx.beginPath();
 
-        ctx.fillStyle =
-        `rgba(255,255,0,${
-            pheromone.strength/100
-        })`;
+      ctx.shadowColor = "#ffff00";
+ctx.shadowBlur = 10;
+
+ctx.fillStyle =
+`rgba(255,255,0,${
+pheromone.strength/100
+})`;
 
         ctx.arc(
 
@@ -261,6 +310,7 @@ else {
         );
 
         ctx.fill();
+        ctx.shadowBlur = 0;
 
     });
 
