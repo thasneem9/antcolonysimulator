@@ -1,6 +1,6 @@
 
 import Canvas from "./components/Canvas"
-
+import './app.css'
 function App() {
  
   return (

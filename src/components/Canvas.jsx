@@ -65,8 +65,8 @@ const [stats, setStats] = useState({
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    const nestX = 850;
-    const nestY = 150;
+    const nestX = 770;
+    const nestY = 210;
 
     // Create ants once
     antsRef.current = [];
@@ -684,126 +684,206 @@ if(tool==="beetle"){
 }
   }
 
-  return (
-   <div
+return (
+<div
 style={{
 display:"flex",
-gap:"25px",
-alignItems:"flex-start"
+height:"100vh",
+background:"#0d1117",
+overflow:"hidden",
+color:"white",
+fontFamily:"Inter, sans-serif"
 }}
 >
-    <div
+
+{/* Canvas Area */}
+
+<div
+style={{
+flex:1,
+display:"flex",
+justifyContent:"center",
+alignItems:"center"
+}}
+>
+
+<canvas
+ref={canvasRef}
+onClick={handleCanvasClick}
+width={900}
+height={700}
+style={{
+background:"#1d2240",
+display:"block"
+}}
+/>
+
+</div>
+
+{/* Dashboard */}
+
+<div
+style={{
+width:340,
+height:"100vh",
+background:"#171c29",
+borderLeft:"1px solid #2b3344",
+padding:"30px 38px 30px 30px",
+boxSizing:"border-box",
+display:"flex",
+flexDirection:"column",
+
+overflowY:"auto",
+overflowX:"hidden",
+
+}}
+>
+
+<h1
+style={{
+    margin:0,
+    marginBottom:30,
+    fontSize:18,
+    fontWeight:700,
+    color:"#8bc6ff",
+
+    textAlign:"center",
+    lineHeight:1.15
+}}
+>
+🐜 ANT COLONY
+</h1>
+
+{/* Tool Buttons */}
+
+<div
 style={{
 display:"flex",
-gap:"10px",
-marginBottom:"15px"
+gap:12,
+marginBottom:35,
+
 }}
 >
 
 <button
 onClick={()=>setTool("beetle")}
+style={{
+flex:1,
+padding:"14px",
+border:"none",
+borderRadius:12,
+cursor:"pointer",
+fontSize:16,
+fontWeight:600,
+background:
+tool==="beetle"
+? "#3b82f6"
+: "#242c3d",
+color:"white",
+transition:"0.2s",
+}}
 >
-
-Beetle
-
+🪲 Beetle
 </button>
 
 <button
 onClick={()=>setTool("wall")}
+style={{
+flex:1,
+padding:"14px",
+border:"none",
+borderRadius:12,
+cursor:"pointer",
+fontSize:16,
+fontWeight:600,
+background:
+tool==="wall"
+? "#10b981"
+: "#242c3d",
+color:"white",
+transition:"0.2s"
+}}
 >
-
-Wall
-
+🧱 Wall
 </button>
 
 </div>
-<div>
-    <canvas
-      ref={canvasRef}
-      onClick={handleCanvasClick}
-      width={1000}
-      height={700}
-      style={{
-        border: "1px solid white",
-        background: "#3c06a1",
-      }}
-    />
-    </div>
-    <div
+
+<h3
 style={{
-
-width:280,
-
-background:"#15171f",
-
-border:"1px solid #2c3140",
-
-borderRadius:18,
-
-padding:20,
-
-color:"white",
-
-boxShadow:"0 0 20px rgba(0,0,0,.35)",
-
-fontFamily:"sans-serif"
-
-}}
->
-
-<h2
-style={{
-
 marginTop:0,
-
 marginBottom:20,
-
-color:"#8bc6ff"
-
+color:"#7f91b2",
+letterSpacing:1
 }}
 >
-
-🐜 Colony Stats
-
-</h2>
+SIMULATION
+</h3>
 
 <Stat
 label="Ants"
-
 value={stats.ants}
 />
 
 <Stat
 label="Beetles"
-
 value={stats.beetles}
 />
 
 <Stat
 label="Walls"
-
 value={stats.walls}
 />
 
 <Stat
 label="Food Trails"
-
 value={stats.foodPheromones}
 />
 
 <Stat
 label="Help Trails"
-
 value={stats.helpPheromones}
 />
 
 <Stat
 label="Delivered"
-
 value={stats.delivered}
 />
 
+<div
+style={{
+flex:1
+}}
+/>
+
+<div
+style={{
+paddingTop:25,
+borderTop:"1px solid #2b3344",
+color:"#6d7c97",
+fontSize:14,
+lineHeight:1.6
+}}
+>
+
+<b style={{color:"#9ecbff"}}>Controls</b>
+
+<br/>
+
+🪲 Click to place beetles
+
+<br/>
+
+🧱 Switch tool to place walls
+
+<br/>
+
+🐜 Ants cooperate automatically
+
 </div>
-    </div>
-  );
+
+</div>
+
+</div>
+);
 }
