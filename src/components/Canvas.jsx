@@ -523,39 +523,242 @@ const nextY =
     ctx.restore();
 }
 
-    function drawBeetles() {
-      beetlesRef.current.forEach((beetle) => {
+   function drawBeetle(beetle){
+
+    ctx.save();
+
+    ctx.translate(beetle.x, beetle.y);
+
+    const size=[
+        6,
+        7,
+        8,
+        10,
+        13,
+        16,
+        20
+    ][beetle.weight-1];
+
+    let shell="#1b1b1b";
+
+    if(beetle.weight==2) shell="#2b2119";
+    if(beetle.weight==3) shell="#264326";
+    if(beetle.weight==4) shell="#46361f";
+    if(beetle.weight==5) shell="#4d2416";
+    if(beetle.weight==6) shell="#222";
+    if(beetle.weight==7) shell="#111";
+
+    ctx.shadowColor="black";
+    ctx.shadowBlur=8;
+    ctx.shadowOffsetY=2;
+
+    //-------------------------
+    // legs
+    //-------------------------
+
+    ctx.strokeStyle="#111";
+    ctx.lineWidth=1.4;
+
+    [-0.8,0,0.8].forEach(y=>{
+
+        ctx.beginPath();
+        ctx.moveTo(-size*0.2,y*size);
+        ctx.lineTo(-size*0.9,y*size-size*0.6);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(size*0.2,y*size);
+        ctx.lineTo(size*0.9,y*size-size*0.6);
+        ctx.stroke();
+
+    });
+
+    //-------------------------
+    // body
+    //-------------------------
+
+    ctx.fillStyle=shell;
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        0,
+        size,
+        size*1.25,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    //-------------------------
+    // glossy shell
+    //-------------------------
+
+    const g=
+    ctx.createRadialGradient(
+        -size/3,
+        -size/2,
+        1,
+        0,
+        0,
+        size
+    );
+
+    g.addColorStop(0,"rgba(255,255,255,.45)");
+    g.addColorStop(1,"rgba(255,255,255,0)");
+
+    ctx.fillStyle=g;
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        0,
+        size,
+        size*1.25,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    //-------------------------
+    // wing split
+    //-------------------------
+
+    ctx.strokeStyle="#555";
+    ctx.lineWidth=1;
+
+    ctx.beginPath();
+
+    ctx.moveTo(0,-size*1.2);
+    ctx.lineTo(0,size*1.2);
+
+    ctx.stroke();
+
+    //-------------------------
+    // head
+    //-------------------------
+
+    ctx.fillStyle="#111";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        -size*1.45,
+        size*0.45,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    //-------------------------
+    // antennae
+    //-------------------------
+
+    ctx.strokeStyle="#111";
+
+    ctx.beginPath();
+
+    ctx.moveTo(-2,-size*1.7);
+    ctx.quadraticCurveTo(-7,-size*2.3,-10,-size*2.8);
+
+    ctx.moveTo(2,-size*1.7);
+    ctx.quadraticCurveTo(7,-size*2.3,10,-size*2.8);
+
+    ctx.stroke();
+
+    //-------------------------
+    // Stag Beetle
+    //-------------------------
+
+    if(beetle.weight==5){
+
         ctx.beginPath();
 
-        ctx.fillStyle = "#39ff14";
+        ctx.moveTo(-2,-size*1.8);
+        ctx.lineTo(-8,-size*2.7);
 
-        ctx.arc(
-          beetle.x,
-          beetle.y,
-          8,
-          0,
-          Math.PI * 2
-        );
+        ctx.moveTo(2,-size*1.8);
+        ctx.lineTo(8,-size*2.7);
 
-        ctx.fill();
-        ctx.fillStyle = "white";
+        ctx.stroke();
 
-ctx.font = "12px Arial";
-
-ctx.fillText(
-
-    beetle.weight,
-
-    beetle.x-4,
-
-    beetle.y-12
-
-);
-      });
     }
+
+    //-------------------------
+    // Rhino Beetle
+    //-------------------------
+
+    if(beetle.weight==6){
+
+        ctx.lineWidth=2;
+
+        ctx.beginPath();
+
+        ctx.moveTo(0,-size*1.8);
+        ctx.lineTo(0,-size*3);
+
+        ctx.stroke();
+
+    }
+
+    //-------------------------
+    // Goliath Beetle
+    //-------------------------
+
+    if(beetle.weight==7){
+
+        ctx.strokeStyle="#ddd";
+        ctx.lineWidth=2;
+
+        for(let i=-2;i<=2;i++){
+
+            ctx.beginPath();
+
+            ctx.moveTo(i*2,-size);
+
+            ctx.lineTo(i*2,size);
+
+            ctx.stroke();
+
+        }
+
+    }
+
+    //-------------------------
+    // weight label
+    //-------------------------
+
+    ctx.shadowBlur=0;
+
+    ctx.fillStyle="white";
+    ctx.font="bold 12px Arial";
+    ctx.textAlign="center";
+
+    ctx.fillText(
+        beetle.weight,
+        0,
+        -size-8
+    );
+
+    ctx.restore();
+
+}
     function drawAnts(){
 
     antsRef.current.forEach(drawAnt);
+
+}
+function drawBeetles(){
+
+    beetlesRef.current.forEach(drawBeetle);
 
 }
     function drawPheromones() {
@@ -796,7 +999,7 @@ style={{
     lineHeight:1.15
 }}
 >
-🐜 ANT COLONY
+ANT COLONY
 </h1>
 
 {/* Tool Buttons */}
@@ -828,7 +1031,7 @@ color:"white",
 transition:"0.2s",
 }}
 >
-🪲 Beetle
+ Beetle
 </button>
 
 <button
@@ -849,7 +1052,7 @@ color:"white",
 transition:"0.2s"
 }}
 >
-🧱 Wall
+ Wall
 </button>
 
 </div>
@@ -915,15 +1118,15 @@ lineHeight:1.6
 
 <br/>
 
-🪲 Click to place beetles
+ Click to place beetles
 
 <br/>
 
-🧱 Switch tool to place walls
+Switch tool to place walls
 
 <br/>
 
-🐜 Ants cooperate automatically
+ Ants cooperate automatically
 
 </div>
 
