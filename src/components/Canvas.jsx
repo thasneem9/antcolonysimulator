@@ -92,14 +92,54 @@ const NEST_RADIUS = 60;
   const distance =
     Math.sqrt(dx * dx + dy * dy);
 
-  if (distance < PICKUP_RADIUS) {
- ant.carryingBeetle =
-  ant.targetBeetle;
+ if (distance < PICKUP_RADIUS) {
 
-ant.carryingBeetle.taken = true;
+    const beetle = ant.targetBeetle;
+    if(
+    beetle.weight > 1 &&
+    beetle.attachedAnts.length < beetle.weight
+){
 
-ant.targetBeetle = null;
-  }
+    ant.pheromoneCooldown--;
+
+    if(ant.pheromoneCooldown<=0){
+
+        pheromonesRef.current.push({
+
+            x:ant.x,
+
+            y:ant.y,
+
+            strength:100,
+
+            type:"help"
+
+        });
+
+        ant.pheromoneCooldown=15;
+
+    }
+
+}
+
+    beetle.attachedAnts.push(ant);
+
+    if (beetle.attachedAnts.length >= beetle.weight) {
+
+      beetle.taken = true;
+
+beetle.leader = beetle.attachedAnts[0];
+
+        beetle.attachedAnts.forEach(a => {
+
+            a.carryingBeetle = beetle;
+            a.targetBeetle = null;
+
+        });
+
+    }
+
+}
 }
 
     // MOVE
@@ -134,8 +174,27 @@ if (ant.pheromoneCooldown <= 0) {
 }
 
   // Carry beetle
-  ant.carryingBeetle.x = ant.x + 10;
-  ant.carryingBeetle.y = ant.y + 10;
+ if (ant.carryingBeetle.leader === ant) {
+
+    ant.carryingBeetle.x = ant.x;
+    ant.carryingBeetle.y = ant.y;
+
+}
+if (ant.carryingBeetle.leader !== ant) {
+
+    const angle = ant.carryingBeetle.attachedAnts.indexOf(ant)
+        * (Math.PI * 2)
+        / ant.carryingBeetle.weight;
+
+    ant.x =
+        ant.carryingBeetle.x +
+        Math.cos(angle) * 12;
+
+    ant.y =
+        ant.carryingBeetle.y +
+        Math.sin(angle) * 12;
+
+}
 
   // Deliver to nest
   const dx = nestX - ant.x;
@@ -169,8 +228,9 @@ else if (ant.targetBeetle) {
 
 }
 else {
+let strongestFood = null;
 
-  let strongest = null;
+let strongestHelp = null;
 
   pheromonesRef.current.forEach((pheromone)=>{
 
@@ -182,20 +242,42 @@ else {
 
     if(distance < PHEROMONE_RADIUS){
 
-      if(
-        !strongest ||
-        pheromone.strength > strongest.strength
-      ){
+     if(pheromone.type==="food"){
 
-        strongest = pheromone;
+    if(
+        !strongestFood ||
+        pheromone.strength>
+        strongestFood.strength
+    ){
 
-      }
+        strongestFood=pheromone;
+
+    }
+
+}
+else{
+
+    if(
+        !strongestHelp ||
+        pheromone.strength>
+        strongestHelp.strength
+    ){
+
+        strongestHelp=pheromone;
+
+    }
+
+}
 
     }
 
   });
 
-  if(strongest){
+  const strongest =
+    strongestHelp ||
+    strongestFood;
+
+if(strongest){
 
     const targetAngle = Math.atan2(
 
@@ -218,9 +300,15 @@ else {
   }
 
 }
+if (
+    !ant.carryingBeetle ||
+    ant.carryingBeetle.leader === ant
+) {
 
     ant.x += Math.cos(ant.angle) * ant.speed;
     ant.y += Math.sin(ant.angle) * ant.speed;
+
+}
     if (ant.carryingBeetle) {
 
   ant.carryingBeetle.x =
@@ -279,6 +367,19 @@ else {
         );
 
         ctx.fill();
+        ctx.fillStyle = "white";
+
+ctx.font = "12px Arial";
+
+ctx.fillText(
+
+    beetle.weight,
+
+    beetle.x-4,
+
+    beetle.y-12
+
+);
       });
     }
     function drawPheromones() {
@@ -286,14 +387,28 @@ else {
     pheromonesRef.current.forEach((pheromone)=>{
 
         ctx.beginPath();
-
-      ctx.shadowColor = "#ffff00";
 ctx.shadowBlur = 10;
 
-ctx.fillStyle =
-`rgba(255,255,0,${
-pheromone.strength/100
-})`;
+if (pheromone.type === "food") {
+
+    ctx.shadowColor = "#ffff00";
+
+    ctx.fillStyle =
+    `rgba(255,255,0,${
+        pheromone.strength/100
+    })`;
+
+}
+else{
+
+    ctx.shadowColor = "#00bfff";
+
+    ctx.fillStyle =
+    `rgba(0,191,255,${
+        pheromone.strength/100
+    })`;
+
+}
 
         ctx.arc(
 
@@ -359,12 +474,20 @@ drawBeetles();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    beetlesRef.current.push({
-      x,
-      y,
-      weight: 5,
-      taken:false
-    });
+  beetlesRef.current.push({
+
+  x,
+
+  y,
+
+  weight: Math.floor(Math.random()*5)+1,
+
+  taken:false,
+
+  attachedAnts:[],
+  leader: null
+
+});
   }
 
   return (
