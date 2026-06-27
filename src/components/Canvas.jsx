@@ -4,6 +4,7 @@ export default function Canvas() {
   const canvasRef = useRef(null);
   const antsRef = useRef([]);
   const beetlesRef = useRef([]);
+  const pheromonesRef = useRef([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -24,6 +25,7 @@ export default function Canvas() {
 
  targetBeetle: null,
 carryingBeetle: null,
+pheromoneCooldown: 0,
 });
     }
 
@@ -109,6 +111,25 @@ if (ant.carryingBeetle) {
 
   ant.angle +=
     (targetAngle - ant.angle) * 0.05;
+    ant.pheromoneCooldown--;
+
+if (ant.pheromoneCooldown <= 0) {
+
+    pheromonesRef.current.push({
+
+        x: ant.x,
+
+        y: ant.y,
+
+        strength: 100,
+
+        type: "food"
+
+    });
+
+    ant.pheromoneCooldown = 15;
+
+}
 
   // Carry beetle
   ant.carryingBeetle.x = ant.x + 10;
@@ -214,6 +235,36 @@ else {
         ctx.fill();
       });
     }
+    function drawPheromones() {
+
+    pheromonesRef.current.forEach((pheromone)=>{
+
+        ctx.beginPath();
+
+        ctx.fillStyle =
+        `rgba(255,255,0,${
+            pheromone.strength/100
+        })`;
+
+        ctx.arc(
+
+            pheromone.x,
+
+            pheromone.y,
+
+            2,
+
+            0,
+
+            Math.PI*2
+
+        );
+
+        ctx.fill();
+
+    });
+
+}
 
     function animate() {
       ctx.clearRect(
@@ -222,11 +273,27 @@ else {
         canvas.width,
         canvas.height
       );
+pheromonesRef.current.forEach((pheromone)=>{
 
-      drawNest();
-      updateAnts();
-      drawAnts();
-      drawBeetles();
+    pheromone.strength -= 0.3;
+
+});
+
+pheromonesRef.current =
+pheromonesRef.current.filter(
+
+    pheromone=>pheromone.strength>0
+
+);
+     drawNest();
+
+updateAnts();
+
+drawPheromones();
+
+drawAnts();
+
+drawBeetles();
 
       requestAnimationFrame(animate);
     }
