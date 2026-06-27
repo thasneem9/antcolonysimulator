@@ -1,4 +1,5 @@
 import { useRef, useEffect,useState } from "react";
+import { MdMusicNote, MdMusicOff } from "react-icons/md";
 function Stat({label,value}){
 
 return(
@@ -54,11 +55,13 @@ const [stats, setStats] = useState({
 
 });
   const [tool, setTool] = useState("beetle");
+  const [musicOn, setMusicOn] = useState(false);
   const canvasRef = useRef(null);
   const antsRef = useRef([]);
   const beetlesRef = useRef([]);
   const pheromonesRef = useRef([]);
   const obstaclesRef = useRef([]);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     
@@ -1034,6 +1037,21 @@ if(tool==="beetle"){
 
 }
   }
+  useEffect(()=>{
+
+    if(!audioRef.current) return;
+
+    if(musicOn){
+
+        audioRef.current.play();
+
+    }else{
+
+        audioRef.current.pause();
+
+    }
+
+},[musicOn]);
 
 return (
 <div
@@ -1090,20 +1108,49 @@ overflowX:"hidden",
 }}
 >
 
+<div
+style={{
+display:"flex",
+alignItems:"center",
+justifyContent:"space-between",
+marginBottom:30
+}}
+>
+
 <h1
 style={{
-    margin:0,
-    marginBottom:30,
-    fontSize:18,
-    fontWeight:700,
-    color:"#8bc6ff",
-
-    textAlign:"center",
-    lineHeight:1.15
+margin:0,
+fontSize:18,
+fontWeight:700,
+color:"#8bc6ff",
+letterSpacing:1
 }}
 >
 ANT COLONY
 </h1>
+
+<button
+onClick={()=>setMusicOn(!musicOn)}
+style={{
+width:30,
+height:30,
+borderRadius:"50%",
+border:"none",
+cursor:"pointer",
+background:musicOn ? "#3b82f6" : "#242c3d",
+color:"white",
+display:"flex",
+alignItems:"center",
+justifyContent:"center",
+fontSize:16,
+padding:0,
+transition:"0.2s"
+}}
+>
+{musicOn ? <MdMusicNote/> : <MdMusicOff/>}
+</button>
+
+</div>
 
 {/* Tool Buttons */}
 
@@ -1234,6 +1281,11 @@ Switch tool to place walls
 </div>
 
 </div>
+<audio
+ref={audioRef}
+loop
+src="/music/gamesound.mp3"
+/>
 
 </div>
 );
