@@ -1,6 +1,58 @@
 import { useRef, useEffect,useState } from "react";
+function Stat({label,value}){
+
+return(
+
+<div
+style={{
+
+display:"flex",
+
+justifyContent:"space-between",
+
+padding:"12px 0",
+
+borderBottom:"1px solid #2b2b2b"
+
+}}
+>
+
+<span>{label}</span>
+
+<strong
+style={{
+
+color:"#55ff9d"
+
+}}
+>
+
+{value}
+
+</strong>
+
+</div>
+
+);
+
+}
 
 export default function Canvas() {
+const [stats, setStats] = useState({
+
+    ants:0,
+
+    beetles:0,
+
+    foodPheromones:0,
+
+    helpPheromones:0,
+
+    walls:0,
+
+    delivered:0
+
+});
   const [tool, setTool] = useState("beetle");
   const canvasRef = useRef(null);
   const antsRef = useRef([]);
@@ -207,16 +259,27 @@ if (ant.carryingBeetle.leader !== ant) {
     dx * dx + dy * dy
   );
 
-  if (distance < NEST_RADIUS) {
+if (
+    distance < NEST_RADIUS &&
+    ant.carryingBeetle.leader === ant
+) {
 
     beetlesRef.current =
       beetlesRef.current.filter(
         beetle => beetle !== ant.carryingBeetle
       );
 
+    setStats(prev => ({
+
+        ...prev,
+
+        delivered: prev.delivered + 1
+
+    }));
+
     ant.carryingBeetle = null;
     ant.targetBeetle = null;
-  }
+}
 
 }
 else if (ant.targetBeetle) {
@@ -525,6 +588,28 @@ drawObstacles();
 drawAnts();
 
 drawBeetles();
+setStats(prev => ({
+
+    ...prev,
+
+    ants: antsRef.current.length,
+
+    beetles: beetlesRef.current.length,
+
+    foodPheromones:
+        pheromonesRef.current.filter(
+            p => p.type === "food"
+        ).length,
+
+    helpPheromones:
+        pheromonesRef.current.filter(
+            p => p.type === "help"
+        ).length,
+
+    walls:
+        obstaclesRef.current.length
+
+}));
 
       requestAnimationFrame(animate);
     }
@@ -576,7 +661,13 @@ if(tool==="beetle"){
   }
 
   return (
-    <>
+   <div
+style={{
+display:"flex",
+gap:"25px",
+alignItems:"flex-start"
+}}
+>
     <div
 style={{
 display:"flex",
@@ -602,6 +693,7 @@ Wall
 </button>
 
 </div>
+<div>
     <canvas
       ref={canvasRef}
       onClick={handleCanvasClick}
@@ -612,6 +704,82 @@ Wall
         background: "#3c06a1",
       }}
     />
-    </>
+    </div>
+    <div
+style={{
+
+width:280,
+
+background:"#15171f",
+
+border:"1px solid #2c3140",
+
+borderRadius:18,
+
+padding:20,
+
+color:"white",
+
+boxShadow:"0 0 20px rgba(0,0,0,.35)",
+
+fontFamily:"sans-serif"
+
+}}
+>
+
+<h2
+style={{
+
+marginTop:0,
+
+marginBottom:20,
+
+color:"#8bc6ff"
+
+}}
+>
+
+🐜 Colony Stats
+
+</h2>
+
+<Stat
+label="Ants"
+
+value={stats.ants}
+/>
+
+<Stat
+label="Beetles"
+
+value={stats.beetles}
+/>
+
+<Stat
+label="Walls"
+
+value={stats.walls}
+/>
+
+<Stat
+label="Food Trails"
+
+value={stats.foodPheromones}
+/>
+
+<Stat
+label="Help Trails"
+
+value={stats.helpPheromones}
+/>
+
+<Stat
+label="Delivered"
+
+value={stats.delivered}
+/>
+
+</div>
+    </div>
   );
 }
