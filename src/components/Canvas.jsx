@@ -51,6 +51,7 @@ carryingBeetle: null,
   const DETECTION_RADIUS = 80;
 const PICKUP_RADIUS = 12;
 
+const NEST_RADIUS = 60;
   antsRef.current.forEach((ant) => {
 
     // DETECT BEETLE
@@ -98,8 +99,9 @@ ant.targetBeetle = null;
 }
 
     // MOVE
-   if (ant.carryingBeetle) {
+if (ant.carryingBeetle) {
 
+  // Turn toward nest
   const targetAngle = Math.atan2(
     nestY - ant.y,
     nestX - ant.x
@@ -107,6 +109,29 @@ ant.targetBeetle = null;
 
   ant.angle +=
     (targetAngle - ant.angle) * 0.05;
+
+  // Carry beetle
+  ant.carryingBeetle.x = ant.x + 10;
+  ant.carryingBeetle.y = ant.y + 10;
+
+  // Deliver to nest
+  const dx = nestX - ant.x;
+  const dy = nestY - ant.y;
+
+  const distance = Math.sqrt(
+    dx * dx + dy * dy
+  );
+
+  if (distance < NEST_RADIUS) {
+
+    beetlesRef.current =
+      beetlesRef.current.filter(
+        beetle => beetle !== ant.carryingBeetle
+      );
+
+    ant.carryingBeetle = null;
+    ant.targetBeetle = null;
+  }
 
 }
 else if (ant.targetBeetle) {
