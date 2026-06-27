@@ -1,12 +1,15 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect,useState } from "react";
 
 export default function Canvas() {
+  const [tool, setTool] = useState("beetle");
   const canvasRef = useRef(null);
   const antsRef = useRef([]);
   const beetlesRef = useRef([]);
   const pheromonesRef = useRef([]);
+  const obstaclesRef = useRef([]);
 
   useEffect(() => {
+    
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
@@ -430,6 +433,27 @@ else{
     });
 
 }
+function drawObstacles(){
+
+    obstaclesRef.current.forEach(obstacle=>{
+
+        ctx.fillStyle="#555";
+
+        ctx.fillRect(
+
+            obstacle.x,
+
+            obstacle.y,
+
+            obstacle.width,
+
+            obstacle.height
+
+        );
+
+    });
+
+}
 
     function animate() {
       ctx.clearRect(
@@ -455,6 +479,7 @@ pheromonesRef.current.filter(
 updateAnts();
 
 drawPheromones();
+drawObstacles();
 
 drawAnts();
 
@@ -474,23 +499,68 @@ drawBeetles();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-  beetlesRef.current.push({
+if(tool==="beetle"){
 
-  x,
+    beetlesRef.current.push({
 
-  y,
+        x,
 
-  weight: Math.floor(Math.random()*5)+1,
+        y,
 
-  taken:false,
+        weight:Math.floor(Math.random()*5)+1,
 
-  attachedAnts:[],
-  leader: null
+        taken:false,
 
-});
+        attachedAnts:[],
+
+        leader:null
+
+    });
+
+}else if(tool==="wall"){
+
+    obstaclesRef.current.push({
+
+        x,
+
+        y,
+
+        width:60,
+
+        height:60
+
+    });
+
+}
   }
 
   return (
+    <>
+    <div
+style={{
+display:"flex",
+gap:"10px",
+marginBottom:"15px"
+}}
+>
+
+<button
+onClick={()=>setTool("beetle")}
+>
+
+Beetle
+
+</button>
+
+<button
+onClick={()=>setTool("wall")}
+>
+
+Wall
+
+</button>
+
+</div>
     <canvas
       ref={canvasRef}
       onClick={handleCanvasClick}
@@ -501,5 +571,6 @@ drawBeetles();
         background: "#3c06a1",
       }}
     />
+    </>
   );
 }
